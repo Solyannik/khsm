@@ -8,7 +8,8 @@ RSpec.describe GameQuestion, type: :model do
 
   # задаем локальную переменную game_question, доступную во всех тестах этого сценария
   # она будет создана на фабрике заново для каждого блока it, где она вызывается
-  let(:game_question) { FactoryGirl.create(:game_question, a: 2, b: 1, c: 4, d: 3) }
+  let(:game) { FactoryBot.create(:game) }
+  let(:game_question) { FactoryBot.create(:game_question, a: 2, b: 1, c: 4, d: 3, game: game) }
 
   # группа тестов на игровое состояние объекта вопроса
   context 'game status' do
@@ -24,7 +25,6 @@ RSpec.describe GameQuestion, type: :model do
       # именно под буквой b в тесте мы спрятали указатель на верный ответ
       expect(game_question.answer_correct?('b')).to be_truthy
     end
-  end
 
   # help_hash у нас имеет такой формат:
   # {
@@ -34,6 +34,18 @@ RSpec.describe GameQuestion, type: :model do
   # }
   #
 
+  it 'correct .level & .text delegates' do
+      expect(game_question.text).to eq(game_question.question.text)
+      expect(game_question.level).to eq(game_question.question.level)
+    end
+  end
+
+  context '.correct_answer_key' do
+    it 'should equal b' do
+      expect(game_question.correct_answer_key).to eq('b')
+    end
+  end
+  
   context 'user helpers' do
     it 'correct audience_help' do
       expect(game_question.help_hash).not_to include(:audience_help)
