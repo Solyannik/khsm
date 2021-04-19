@@ -29,7 +29,43 @@ RSpec.describe GamesController, type: :controller do
       expect(flash[:alert]).to be # во flash должен быть прописана ошибка
     end
   end
+    
+    it 'kick from #create' do
+      expect { post :create }.to change(Game, :count).by(0)
 
+      game = assigns(:game)
+      expect(game).to be nil
+
+      expect(response.status).not_to eq(200)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be
+    end
+
+    it 'kick from #answer' do
+      put :answer, id: game_w_questions.id
+
+      expect(response.status).not_to eq(200)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be
+    end
+
+    it 'kick from #take_money' do
+      put :take_money, id: game_w_questions.id
+
+      expect(response.status).not_to eq(200)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be
+    end
+
+    it 'kick from #help' do
+      put :help, id: game_w_questions.id
+
+      expect(response.status).not_to eq(200)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be
+    end
+  end
+  
   # группа тестов на экшены контроллера, доступных залогиненным юзерам
   context 'Usual user' do
     # перед каждым тестом в группе
@@ -62,7 +98,7 @@ RSpec.describe GamesController, type: :controller do
       expect(response).to redirect_to(game_path(game_w_questions))
       expect(flash[:alert]).to be
     end
-    
+
     # юзер видит свою игру
     it '#show game' do
       get :show, id: game_w_questions.id
