@@ -110,47 +110,77 @@ RSpec.describe Game, type: :model do
     end
   end
 
-  context '.previous_level' do
-    it 'returns 1 when 2 questions had been answered' do
-      2.times do
-        q = game_w_questions.current_game_question
-        game_w_questions.answer_current_question!(q.correct_answer_key)
+  describe '#answer_current_question!' do
+    let(:correct_answer_key) { game_w_questions.current_game_question.correct_answer_key }
+
+    context 'when answer correct' do
+      let!(:level) { game_w_questions.current_level }
+
+      before do
+        game_w_questions.answer_current_question!(correct_answer_key)
       end
 
-      expect(game_w_questions.previous_level).to eq 1
+      context 'and question is not last' do
+        it 'should increase the current level by 1' do
+          expect(game_w_questions.current_level).to eq(level + 1)
+        end
+
+        it 'should continue game' do
+          expect(game_w_questions.status).to eq :in_progress
+          expect(game_w_questions.finished?).to be false
+        end
+      end
+
+      context 'and question is last' do
+        let(:level) { Question::QUESTION_LEVELS.max }
+        let(:game_w_questions) { FactoryBot.create(:game_with_questions, current_level: level, user: user)}
+
+        it 'should increase the current level by 1' do
+          expect(game_w_questions.current_level).to eq(level + 1)
+        end
+
+        it 'should assign final prize' do
+          prize = game_w_questions.prize
+
+          expect(prize).to eq described_class::PRIZES[level]
+          expect(user.balance).to eq prize
+        end
+
+        it 'should finish game with status won' do
+          expect(game_w_questions.status).to eq :won
+          expect(game_w_questions.finished?).to be true
+        end
+      end
+
+      context 'and time is out' do
+        let(:game_w_questions) { FactoryBot.create(:game_with_questions, created_at: 1.hour.ago, user: user)}
+
+        it 'should finish game with status timeout' do
+          expect(game_w_questions.status).to eq :timeout
+          expect(game_w_questions.finished?).to be true
+        end
+      end
+    end
+
+    context 'when answer is wrong' do
+      let(:wrong_answer_key) { (game_w_questions.current_game_question.variants.keys - [correct_answer_key]).sample }
+
+      before do
+        game_w_questions.answer_current_question!(wrong_answer_key)
+      end
+
+      it 'should finish game with status fail' do
+        expect(game_w_questions.status).to eq :fail
+        expect(game_w_questions.finished?).to be true
+      end
     end
   end
 
-  context '.answer_current_question!' do
-    let(:q) { game_w_questions.current_game_question }
+  it '#current_game_question' do
+    expect(game_w_questions.current_game_question).to eq game_w_questions.game_questions[0]
+  end
 
-    it 'returns true if answer is correct and game stays in_progress' do
-      expect(game_w_questions.answer_current_question!(q.correct_answer_key)).to be_truthy
-      expect(game_w_questions.status).to eq :in_progress
-      expect(game_w_questions.finished?).to be_falsey
-    end
-
-    it 'returns false if answer is incorrect and changes status to :fail' do
-      expect(game_w_questions.answer_current_question!('a')).to be_falsey
-      expect(game_w_questions.status).to eq :fail
-      expect(game_w_questions.finished?).to be_truthy
-    end
-
-    it 'changes status to :won when last question answered and sets prize to 1 000 000' do
-      game_w_questions.current_level = Question::QUESTION_LEVELS.max
-
-      expect(game_w_questions.answer_current_question!(q.correct_answer_key)).to be_truthy
-      expect(game_w_questions.status).to eq :won
-      expect(game_w_questions.prize).to eq(1000000)
-      expect(game_w_questions.finished?).to be_truthy
-    end
-
-    it 'returns false if timed out and changes status to :timeout' do
-      game_w_questions.created_at = Time.now - Game::TIME_LIMIT
-
-      expect(game_w_questions.answer_current_question!(q.correct_answer_key)).to be_falsey
-      expect(game_w_questions.status).to eq :timeout
-      expect(game_w_questions.finished?).to be_truthy
-    end
+  it '#previous_level' do
+    expect(game_w_questions.previous_level).to eq -1
   end
 end
