@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe 'users/show', type: :view do
-
   let(:game) { FactoryBot.build_stubbed(:game) }
   let(:user) { FactoryBot.create(:user, name: 'Ольга') }
 
