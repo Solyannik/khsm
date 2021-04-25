@@ -3,24 +3,25 @@ require 'rails_helper'
 RSpec.feature 'USER views another profile', type: :feature do
   let(:user1) { FactoryBot.create(:user, name: 'user1') }
   let(:user2) { FactoryBot.create(:user, name: 'user2') }
-  let!(:games)  do [
-    FactoryBot.create(
-      :game,
-      user_id: user1.id,
-      current_level: 5,
-      created_at: Time.parse('2021.04.23, 15:00'),
-      finished_at: Time.parse('2021.04.23, 15:30'),
-      fifty_fifty_used: true,
-      prize: 1000
+  let!(:games)  do 
+    [
+      FactoryBot.create(
+        :game,
+        user_id: user1.id,
+        current_level: 5,
+        created_at: Time.parse('2021.04.23, 15:00'),
+        finished_at: Time.parse('2021.04.23, 15:30'),
+        fifty_fifty_used: true,
+        prize: 1000
       ),
-    FactoryBot.create(
-      :game,
-      user_id: user1.id,
-      prize: 32000,
-      current_level: 10,
-      created_at: Time.parse('2021.04.23, 16:00'),
-      finished_at: Time.parse('2021.04.23, 16:30'),
-      is_failed: true
+      FactoryBot.create(
+        :game,
+        user_id: user1.id,
+        prize: 32000,
+        current_level: 10,
+        created_at: Time.parse('2021.04.23, 16:00'),
+        finished_at: Time.parse('2021.04.23, 16:30'),
+        is_failed: true
       )
     ]
   end
