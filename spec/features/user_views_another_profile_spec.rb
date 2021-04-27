@@ -9,7 +9,7 @@ RSpec.feature 'USER views another profile', type: :feature do
         :game,
         user_id: user1.id,
         current_level: 5,
-        created_at: Time.parse('2021.04.23, 15:00'),
+        created_at: Time.zone.parse('2021.04.23, 15:00'),
         finished_at: Time.parse('2021.04.23, 15:30'),
         fifty_fifty_used: true,
         prize: 1000
@@ -19,7 +19,7 @@ RSpec.feature 'USER views another profile', type: :feature do
         user_id: user1.id,
         prize: 32000,
         current_level: 10,
-        created_at: Time.parse('2021.04.23, 16:00'),
+        created_at: Time.zone.parse('2021.04.23, 16:00'),
         finished_at: Time.parse('2021.04.23, 16:30'),
         is_failed: true
       )
@@ -36,14 +36,14 @@ RSpec.feature 'USER views another profile', type: :feature do
     # 1я игра
     expect(page).to have_content games[0].id
     expect(page).to have_content 'деньги'
-    expect(page).to have_content '23 апр., 16:00'
+    expect(page).to have_content '23 апр., 15:00'
     expect(page).to have_content '5'
     expect(page).to have_content '1 000'
     expect(page).to have_content '50/50'
 
     # 2я игра
     expect(page).to have_content games[1].id
-    expect(page).to have_content '23 апр., 17:00'
+    expect(page).to have_content '23 апр., 16:00'
     expect(page).to have_content '10'
     expect(page).to have_content '32 000'
     expect(page).to have_content '50/50'
